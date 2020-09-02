@@ -39,7 +39,10 @@ bulletX_change = 0
 bulletY_change = 7
 bullet_state = "ready"
 
-score = 0
+score_value = 0
+font = pygame.font.Font('freesansbold.ttf', 38)
+
+game_over_font = pygame.font.Font('freesansbold.ttf', 63)
 
 
 def player(x, y):
@@ -61,6 +64,16 @@ def is_collision(x1, x2, y1, y2):
     return distance <= 27
 
 
+def show_score():
+    text = font.render('Score : ' + str(score_value), True, (255, 255, 255))
+    screen.blit(text, (10, 10))
+
+
+def game_over_text():
+    text = game_over_font.render('GAME OVER', True, (255, 255, 255))
+    screen.blit(text, (200, 250))
+
+
 while running:
     screen.fill((0, 0, 0))
     screen.blit(bg_pic, (0, 0))
@@ -74,9 +87,10 @@ while running:
                 playerX_change = -4
             if event.key == pygame.K_RIGHT:
                 playerX_change = 4
-            if event.key == pygame.K_SPACE and bullet_state is "ready":
-                bulletX = playerX
-                fire_bullet(bulletX, bulletY)
+            if event.key == pygame.K_SPACE:
+                if bullet_state == "ready":
+                    bulletX = playerX
+                    fire_bullet(bulletX, bulletY)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
@@ -89,6 +103,14 @@ while running:
         playerX = 736
 
     for i in range(num_of_enemies):
+
+        # Game Over check
+        if enemyY[i] > 440:
+            for j in range(num_of_enemies):
+                enemyY[j] = 2000
+            game_over_text()
+            break
+
         enemyX[i] += enemyX_change[i]
         if enemyX[i] <= 0:
             enemyX_change[i] = 4
@@ -102,8 +124,7 @@ while running:
             bulletY = 400
             enemyX[i] = random.randint(0, 735)
             enemyY[i] = random.randint(50, 150)
-            score += 1
-            print(score)
+            score_value += 1
 
         enemy(enemyX[i], enemyY[i], i)
 
@@ -111,7 +132,7 @@ while running:
     player(playerX, playerY)
 
     # Bullet movement
-    if bullet_state is "fire":
+    if bullet_state == "fire":
         fire_bullet(bulletX, bulletY)
         bulletY -= bulletY_change
 
@@ -119,4 +140,5 @@ while running:
         bullet_state = "ready"
         bulletY = 400
 
+    show_score()
     pygame.display.update()
